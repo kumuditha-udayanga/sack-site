@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ feature-new-site ]
+  pull_request:
+      branches: [ feature-new-site ]
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+      - uses: actions/checkout@v2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+
+      - name: Install packages
+        run: npm install
+
+      - name: Install bundle
+        run: bundle install
+
+      - name: Build the app
+        run: jekyll build
+
+      # Install Surge
+      - name: Install Surge
+        run: npm install -g surge
+
+      # Deploy to the defined URL using the token
+      - name: Deploy to surge
+        run: surge ./_site https://testing-sack-site.surge.sh/ --token ${{secrets.SURGE_TOKEN}}
+
